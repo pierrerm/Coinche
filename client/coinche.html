@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Hello!</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+    <!-- import the webpage's javascript file -->
+    <script src="/script.js" defer></script>
+    <style type="text/css">
+        /* CSS files add styling rules to your content */
+        body {
+            font-family: helvetica, arial, sans-serif;
+        }
+        
+        h1 {
+            font-style: italic;
+            color: #373fff;
+        }
+        
+        h2 {
+            color: #e6ce8a;
+        }
+        
+        h3 {
+            color: red;
+        }
+        
+        html {
+            min-height: 100%;
+            box-shadow: inset 0 0 300em 1em #000;
+            background: url("https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2FBoard.png?v=1584225304878") no-repeat center center fixed; 
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+        }
+        
+        .deck {
+            width: 35%;
+            margin-left: auto ;
+            margin-right: auto ;
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            position: relative;
+        } 
+        
+        .deckEast {
+            width: 147%;
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            position: relative;
+            -webkit-transform: rotate(90deg);
+            -moz-transform: rotate(90deg);
+            -o-transform: rotate(90deg);
+            -ms-transform: rotate(90deg);
+            transform: rotate(90deg);
+        } 
+        
+        .deckWest {
+            width: 30%;
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            position: relative;
+            -webkit-transform: rotate(270deg);
+            -moz-transform: rotate(270deg);
+            -o-transform: rotate(270deg);
+            -ms-transform: rotate(270deg);
+            transform: rotate(270deg);
+        } 
+        
+        #board{
+            width=100%;
+            height=100%;
+        }
+        
+        #totalScoreDiv {
+            border-radius: 5%;
+            border-style: solid;
+            border-width: thick;
+            border-color: #e6ce8a;
+            width: 13%;
+            padding-left: 2%;
+            position:absolute;
+            top:0;
+            left:0;
+        }
+        
+        #roundScoreDiv {
+            width: 15%;
+            position:absolute;
+            top:0;
+            right:0;
+        }
+        
+        #roundScore {
+            border-radius: 5%;
+            border-style: solid;
+            border-width: thick;
+            border-color: #e6ce8a;
+            padding-left: 15%;
+        }
+        
+        
+        /* display trump and announce for the round */
+        #trump {
+            background: white;
+            border-radius: 10%;
+            border-style: solid;
+            border-width: thick;
+            border-color: red;
+            height: 2rem;
+            width:50%;
+            margin-left:auto;
+            text-align:center
+        }
+        
+        #trumpScore {
+            position: relative;
+            top: -40%;
+        }
+        
+        .scoreTitle {
+            font-style: italic;
+            margin-bottom:-7%;
+        }
+        
+        .south {
+            width=100%;
+            position:absolute;
+            bottom:0;
+        }
+        
+        .north {
+            width=100%;
+            position:absolute;
+            top:0;
+        }
+        
+        .east {
+            width=100%;
+            position:absolute;
+            top:50%;
+            left: 78%;
+        }
+        
+        .west {
+            width=100%;
+            position:absolute;
+            left:-11%;
+            top:50%;
+        }
+        
+        .card {
+            width: 100%;
+            height: auto;
+        }
+        
+        .card1 {
+            grid-column: 1 / span 2;
+            grid-row: 1;
+            z-index: 1;
+        }
+        
+        .card2 {
+            grid-column: 2 / span 2;
+            grid-row: 1;
+            z-index: 2;
+        }
+        
+        .card3 {
+            grid-column: 3 / span 2;
+            grid-row: 1;
+            z-index: 3;
+        }
+        
+        .card4 {
+            grid-column: 4 / span 2;
+            grid-row: 1;
+            z-index: 4;
+        }
+        
+        .card5 {
+            grid-column: 5 / span 2;
+            grid-row: 1;
+            z-index: 5;
+        }
+        
+        .card6 {
+            grid-column: 6 / span 2;
+            grid-row: 1;
+            z-index: 6;
+        }
+        
+        .card7 {
+            grid-column: 7 / span 2;
+            grid-row: 1;
+            z-index: 7;
+        }
+        
+        .card8 {
+            grid-column: 8 / span 2;
+            grid-row: 1;
+            z-index: 8;
+        }
+    </style>
+  </head>
+  <body>
+    <div id="totalScoreDiv">
+      <h2 class="scoreTitle">
+        Total Score
+      </h2>
+      <h2>
+        U : 760 <br />
+        T : 120
+      </h2>
+    </div>
+
+    <div id="roundScoreDiv">
+      <div id="roundScore">
+        <h2 class="scoreTitle">
+          Round Score
+        </h2>
+        <h2>
+          U : 81 &#9668 <br /> 	<!-- &#9668 indicate which team has bet -->
+          T : 0
+        </h2>
+      </div>
+      <div id="trump">
+        <h3 id="trumpScore">
+          120 	&#9829
+        </h3>
+      </div>
+    </div>
+
+    <div id="board">
+      <div id="southDiv" class="south">
+        <div id="southCards" class="deck">
+          <div id="southCard1div" class="card1">
+            <a id="southCard1">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2F7H.png?v=1584225708464"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="southCard2div" class="card2">
+            <a id="southCard2">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2F8H.png?v=1584225708464"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="southCard3div" class="card3">
+            <a id="southCard3">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2F9H.png?v=1584225708464"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="southCard4div" class="card4">
+            <a id="southCard4">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2F10H.png?v=1584225708464"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="southCard5div" class="card5">
+            <a id="southCard5">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2FJH.png?v=1584225708464"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="southCard6div" class="card6">
+            <a id="southCard6">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2FQH.png?v=1584640607060"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="southCard7div" class="card7">
+            <a id="southCard7">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2FKH.png?v=1584641187635"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="southCard8div" class="card8">
+            <a id="southCard8">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2FAH.png?v=1584640682893"
+                class="card"
+              />
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div id="northDiv" class="north">
+        <div id="northCards" class="deck">
+          <div id="northCard1div" class="card1">
+            <a id="northCard1">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="northCard2div" class="card2">
+            <a id="northCard2">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="northCard3div" class="card3">
+            <a id="northCard3">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="northCard4div" class="card4">
+            <a id="northCard4">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="northCard5div" class="card5">
+            <a id="northCard5">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="northCard6div" class="card6">
+            <a id="northCard6">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="northCard7div" class="card7">
+            <a id="northCard7">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="northCard8div" class="card8">
+            <a id="northCard8">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div id="westDiv" class="west">
+        <div id="westCards" class="deckWest">
+          <div id="westCard1div" class="card1">
+            <a id="westCard1">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="westCard2div" class="card2">
+            <a id="westCard2">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="westCard3div" class="card3">
+            <a id="westCard3">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="westCard4div" class="card4">
+            <a id="westCard4">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="westCard5div" class="card5">
+            <a id="westCard5">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="westCard6div" class="card6">
+            <a id="westCard6">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="westCard7div" class="card7">
+            <a id="westCard7">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="westCard8div" class="card8">
+            <a id="westCard8">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div id="eastDiv" class="east">
+        <div id="eastCards" class="deckEast">
+          <div id="eastCard1div" class="card1">
+            <a id="eastCard1">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="eastCard2div" class="card2">
+            <a id="eastCard2">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="eastCard3div" class="card3">
+            <a id="eastCard3">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="eastCard4div" class="card4">
+            <a id="eastCard4">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="eastCard5div" class="card5">
+            <a id="eastCard5">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="eastCard6div" class="card6">
+            <a id="eastCard6">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="eastCard7div" class="card7">
+            <a id="eastCard7">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+          <div id="eastCard8div" class="card8">
+            <a id="eastCard8">
+              <img
+                src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2Fred_back.png?v=1584642175281"
+                class="card"
+              />
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- <div class="glitchButton" style="position:fixed;top:20px;right:20px;"></div>
+    <script src="https://button.glitch.me/button.js"></script> -->
+  </body>
+</html>

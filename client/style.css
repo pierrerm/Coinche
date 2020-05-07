@@ -1,0 +1,196 @@
+/* CSS files add styling rules to your content */
+
+body {
+    font-family: helvetica, arial, sans-serif;
+  }
+  
+  h1 {
+    font-style: italic;
+    color: #373fff;
+  }
+  
+  h2 {
+    color: #e6ce8a;
+  }
+  
+  h3 {
+    color: red;
+  }
+  
+  html {
+    min-height: 100%;
+    box-shadow: inset 0 0 300em 1em #000;
+    background: url("https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2FBoard.png?v=1584225304878") no-repeat center center fixed; 
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+  }
+  
+  .deck {
+    width: 35%;
+    margin-left: auto ;
+    margin-right: auto ;
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    position: relative;
+  } 
+  
+  .deckEast {
+    width: 147%;
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    position: relative;
+    -webkit-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    transform: rotate(90deg);
+  } 
+  
+  .deckWest {
+    width: 30%;
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    position: relative;
+    -webkit-transform: rotate(270deg);
+    -moz-transform: rotate(270deg);
+    -o-transform: rotate(270deg);
+    -ms-transform: rotate(270deg);
+    transform: rotate(270deg);
+  } 
+  
+  #board{
+    width=100%;
+    height=100%;
+  }
+  
+  #totalScoreDiv {
+    border-radius: 5%;
+    border-style: solid;
+    border-width: thick;
+    border-color: #e6ce8a;
+    width: 13%;
+    padding-left: 2%;
+    position:absolute;
+    top:0;
+    left:0;
+  }
+  
+  #roundScoreDiv {
+    width: 15%;
+    position:absolute;
+    top:0;
+    right:0;
+  }
+  
+  #roundScore {
+    border-radius: 5%;
+    border-style: solid;
+    border-width: thick;
+    border-color: #e6ce8a;
+    padding-left: 15%;
+  }
+  
+  
+  /* display trump and announce for the round */
+  #trump {
+    background: white;
+    border-radius: 10%;
+    border-style: solid;
+    border-width: thick;
+    border-color: red;
+    height: 2rem;
+    width:50%;
+    margin-left:auto;
+    text-align:center
+  }
+  
+  #trumpScore {
+    position: relative;
+    top: -40%;
+  }
+  
+  .scoreTitle {
+    font-style: italic;
+    margin-bottom:-7%;
+  }
+  
+  .south {
+    width=100%;
+    position:absolute;
+    bottom:0;
+  }
+  
+  .north {
+    width=100%;
+    position:absolute;
+    top:0;
+  }
+  
+  .east {
+    width=100%;
+    position:absolute;
+    top:50%;
+    left: 78%;
+  }
+  
+  .west {
+    width=100%;
+    position:absolute;
+    left:-11%;
+    top:50%;
+  }
+  
+  .card {
+    width: 100%;
+    height: auto;
+  }
+  
+  .card1 {
+    grid-column: 1 / span 2;
+    grid-row: 1;
+    z-index: 1;
+  }
+  
+  .card2 {
+    grid-column: 2 / span 2;
+    grid-row: 1;
+    z-index: 2;
+  }
+  
+  .card3 {
+    grid-column: 3 / span 2;
+    grid-row: 1;
+    z-index: 3;
+  }
+  
+  .card4 {
+    grid-column: 4 / span 2;
+    grid-row: 1;
+    z-index: 4;
+  }
+  
+  .card5 {
+    grid-column: 5 / span 2;
+    grid-row: 1;
+    z-index: 5;
+  }
+  
+  .card6 {
+    grid-column: 6 / span 2;
+    grid-row: 1;
+    z-index: 6;
+  }
+  
+  .card7 {
+    grid-column: 7 / span 2;
+    grid-row: 1;
+    z-index: 7;
+  }
+  
+  .card8 {
+    grid-column: 8 / span 2;
+    grid-row: 1;
+    z-index: 8;
+  }
