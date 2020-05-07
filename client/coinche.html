@@ -8,7 +8,6 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
     <!-- import the webpage's javascript file -->
-    <script src="/script.js" defer></script>
     <style type="text/css">
         /* CSS files add styling rules to your content */
         body {
@@ -239,7 +238,7 @@
       <div id="southDiv" class="south">
         <div id="southCards" class="deck">
           <div id="southCard1div" class="card1">
-            <a id="southCard1">
+            <a id="southCard1" onclick="sendMsg()">
               <img
                 src="https://cdn.glitch.com/20e4e05a-f629-46f5-96bc-240e28f76d7e%2F7H.png?v=1584225708464"
                 class="card"
@@ -512,6 +511,17 @@
         </div>
       </div>
     </div>
+    <script>
+        const socket = io("http://localhost:8080");
+
+        function sendMsg() {
+        socket.emit("message", "HELLO WORLD");
+        }
+
+        socket.on("message", function(data) {
+        console.log(data);
+        });
+    </script>
     <!-- <div class="glitchButton" style="position:fixed;top:20px;right:20px;"></div>
     <script src="https://button.glitch.me/button.js"></script> -->
   </body>
