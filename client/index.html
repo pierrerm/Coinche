@@ -8,7 +8,8 @@
     <title>Document</title>
   </head>
   <body>
-    <button onClick="sendMsg()">Hit Me</button>
+    <button onClick="connect(this.innerHTML)">Join Team 1</button>
+    <button onClick="connect(this.innerHTML)">Join Team 2</button>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
     <script>
@@ -18,7 +19,19 @@
         socket.emit("message", "HELLO WORLD");
       }
 
+      function connect(btnText) {
+        team = "0";
+        if (btnText.includes("2")) {
+          team = "1";
+        }
+        socket.emit("joinTeam", team);
+      }
+
       socket.on("message", function(data) {
+        console.log(data);
+      });
+      
+      socket.on("connectReceipt", function(data) {
         console.log(data);
       });
     </script>
