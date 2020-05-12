@@ -24,7 +24,7 @@ class Game():
 
       self.data= {"team_names":team_names, "player_names":player_names, "player_bots":player_bots}
 
-      self.Round=Round(team_names=self.data["team_names"], player_names=self.data["player_names"], player_bots=self.data["player_bots"],
+      self.round=Round(team_names=self.data["team_names"], player_names=self.data["player_names"], player_bots=self.data["player_bots"],
                 number=0,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),hidden=hidden,
                 difficulty=difficulty)
 
@@ -35,16 +35,16 @@ class Game():
 
 
   def result(self): # normalement mise nest pas char
-      total_points=self.Round.teams[0].pli.count_points()+self.Round.teams[1].pli.count_points()
+      total_points=self.round.teams[0].pli.count_points()+self.round.teams[1].pli.count_points()
       assert(total_points==162 or total_points==182) #compte les points par équipe pas encore de 10 de der
-      if self.Round.surcoinche :
+      if self.round.surcoinche :
           multiplicator = 4
-      elif self.Round.coinche :
+      elif self.round.coinche :
           multiplicator = 2
       else :
           multiplicator =1
 
-      for team in self.Round.teams :
+      for team in self.round.teams :
           if team.bet != None:
               capot= team.bet==250 and len(team.pli.cards)==32 #bool capot
               generale=(team.players[0].plis==8 and team.players[0].generale==True ) or ( team.players[1].plis==8 and team.players[1].generale==True) #bool generale
@@ -54,20 +54,20 @@ class Game():
                   print("l'équipe {} a réussit son contrat".format(team.name))
 
                 #cas 1.1 : coinché ou surcoinché
-                if self.Round.coinche :
+                if self.round.coinche :
                     self.score[team.name] += team.bet*multiplicator # seulement points contrats
-                    self.score[self.Round.teams[(team.number+1)%2].name] += 0 #points defense
+                    self.score[self.round.teams[(team.number+1)%2].name] += 0 #points defense
 
                 #cas 1.2 : normal
                 else :
                     self.score[team.name] += team.bet # seulement points contrats
-                    self.score[self.Round.teams[(team.number+1)%2].name] += self.Round.teams[(team.number+1)%2].pli.points #points defense
+                    self.score[self.round.teams[(team.number+1)%2].name] += self.round.teams[(team.number+1)%2].pli.points #points defense
 
               #cas 2 : échec du contrat
               else :
                   if not self.hidden: #GRAPHIC
                     print("l'équipe {} a chuté ".format(team.name))
-                  self.score[self.Round.teams[(team.number+1)%2].name] += 160*multiplicator
+                  self.score[self.round.teams[(team.number+1)%2].name] += 160*multiplicator
 
   def end_round(self) :
 
@@ -77,7 +77,7 @@ class Game():
        for team in self.score:
          if self.score[team]>self.limit: #error
                if not self.hidden: #GRAPHIC
-                 print(self.Round.atout, self.Round.teams[0].bet, self.Round.teams[1].bet)
+                 print(self.round.atout, self.round.teams[0].bet, self.round.teams[1].bet)
                  print( " l'équipe {} a gagné avec {} ".format(team, self.score))
                return False
        return True
@@ -86,10 +86,10 @@ class Game():
 
     pioche=Hand(name="pioche",cards=[],sort=False)
       # the last round was played
-    pioche+=self.Round.teams[0].pli
-    pioche+=self.Round.teams[1].pli
+    pioche+=self.round.teams[0].pli
+    pioche+=self.round.teams[1].pli
       # the last round wasn't played
-    players_in_order=self.Round.getPlayersInOrder() #changer ordre a chaque manche ????
+    players_in_order=self.round.getPlayersInOrder() #changer ordre a chaque manche ????
     for player in players_in_order :
       pioche+=player.Hand
     assert(pioche.rest["cards"]==32)
@@ -98,7 +98,7 @@ class Game():
     for card in pioche.cards : # it seems to work
       card.reset()
 
-    self.Round=Round(team_names=self.data["team_names"], player_names=self.data["player_names"], player_bots=self.data["player_bots"],
+    self.round=Round(team_names=self.data["team_names"], player_names=self.data["player_names"], player_bots=self.data["player_bots"],
                         number=round_number,pioche=pioche,hidden=self.hidden,
                         difficulty=self.difficulty)
 
@@ -116,7 +116,7 @@ class Game():
          while True : #round of assertion : is a trump is taken or not
            round_number+=1
            self.new_round(round_number)
-           played=self.Round.run()
+           played=self.round.run()
            if played :
              break
          if not self.end_round():
