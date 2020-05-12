@@ -23,7 +23,7 @@ class Round():
                number,pioche, hidden=False,
                difficulty="beginner"): # e1 et e2 inutiles
 
-    self.number=number
+    self.number=number 
     self.trump=None #trump of the round
     self.coinche=False #indicator of coinche
     self.surcoinche=False
@@ -37,7 +37,6 @@ class Round():
       players_cards=self.classic_draw()
 
     #bots creation
-    # number_of_bots = j1_random+j2_random+j3_random+j4_random) #count number of bots
 
     self.bots={}
 
@@ -112,12 +111,17 @@ class Round():
 
 
 
-  def shortkey(self): #write quicker
+  def getPlayersInOrder(self): #TODO Test this method graphicaly to check everything is fine
     """
-    In order to write quicker return an array of four players j1 j2 j3 j4
+    Return an array of four players ordained according to the current round
+    This method is basically used to shift the first player each round
     """
     players=[self.teams[0].players[0],  self.teams[1].players[0], self.teams[0].players[1], self.teams[1].players[1]]
-    return players
+
+    #This little trick should shift the first player every round 
+    return [ players[ ( i + self.number-1 ) % 4 ] for i in range(4) ]
+
+    
 
 
   #TODO : Remove it must be javascript
@@ -125,7 +129,7 @@ class Round():
      """
      fix the trump and return true if someone didnt pass his turn
      """
-     j=self.shortkey()
+     j=self.getPlayersInOrder()
      bet=0
      annonce_actuelle=-1
      turn=0
@@ -198,7 +202,7 @@ class Round():
     """
     Update the cards after the trump color is choosen
     """
-    players=self.shortkey()
+    players=self.getPlayersInOrder()
     #normal
     if self.trump in const.COLORS[:4]:
 
@@ -304,7 +308,7 @@ class Round():
 
 
 
-  def play_pli(self, players, pli_number): #•fonctionne
+  def play_pli(self, players, pli_number): 
       """
       prends en entrée le tableau ORDONNEE des players de ce pli et le renvoi réordonné
       """
@@ -337,13 +341,31 @@ class Round():
 
       return new_order
 
+  def run(self):
+    """
+    Run the round
+    """
+    if self.choose_trump() : #choisir valeur par defaut pour les test
+      players_in_order=self.getPlayersInOrder() #changer ordre a chaque manche ????
+      self.cards_update()
+      for i in range(8):
+        if not self.hidden: #GRAPHIC
+            print("pli {} : \n \n".format(i))
+        players_in_order=self.play_pli( players=players_in_order, pli_number=i+1) #erreur dans le decompte des plis confusion avec les tas player bug a iteration2 a priori fonctionne : confusion entre la position dans la main et celles des cartes possibles
+      for k in range(2):
+        if not self.hidden: #GRAPHIC
+          self.teams[k].pli.display()
+      return True #a trump was picked
+    else :
+      return False #nobody picked a trump : it's a white round
+      
 """
 TESTS 
 """
 
 def test_init():
   myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
-                   hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=0)
+                   hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
 
 
   "check if pioche is empty"
@@ -370,7 +392,7 @@ def test_init():
 def test_classic_drawing():
 
   myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
-                   hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=0)
+                   hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
 
   myround.pioche = Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]])
   players=myround.classic_draw()
@@ -414,7 +436,7 @@ def test_classic_drawing():
 def test_cut():
 
   myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
-                   hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=0)
+                   hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
 
   for nb_of_try in range(100):
 
@@ -433,39 +455,67 @@ def test_cut():
 
 
 
-def test_shortcut():
+def test_getPlayersInOrder():
   myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
-                   hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=0)
+                   hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
 
-  p=myround.shortkey()
+  p=myround.getPlayersInOrder()
   p[1].Hand=Hand(cards=[Card("7","trefle")])
   assert(myround.teams[1].players[0].Hand.check_card(Card("7","trefle")))
+
+  myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
+                   hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=2)
+
+  p=myround.getPlayersInOrder()
+  p[1].Hand=Hand(cards=[Card("7","trefle")])
+  assert(myround.teams[0].players[1].Hand.check_card(Card("7","trefle")))
+
+  myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
+                   hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=7)
+
+  p=myround.getPlayersInOrder()
+  p[1].Hand=Hand(cards=[Card("7","trefle")])
+  assert(myround.teams[1].players[1].Hand.check_card(Card("7","trefle")))
+
+  myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
+                   hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=12)
+
+  p=myround.getPlayersInOrder()
+  p[1].Hand=Hand(cards=[Card("7","trefle")])
+  assert(myround.teams[0].players[0].Hand.check_card(Card("7","trefle")))
 
 
 
 def test_choose_trump(): #random test
   myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
-                  hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=0)
+                  hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
   myround.choose_trump()
 
 def test_cards_update(): #random test
   myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
-                   hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=0)
+                   hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
   if myround.choose_trump() :
      myround.cards_update()
 
 def test_play_pli(hidden=True): #•fonctionne
   myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
-                  hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=0)
+                  hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
   if myround.choose_trump() :
     myround.cards_update()
-    players=myround.shortkey()
+    players=myround.getPlayersInOrder()
     for i in range(8):
       players=myround.play_pli(pli_number=i,players=players)
 
-def test_bot():
+def test_run():
+  for i in range(500):
+    myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
+                    hidden=True,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
+    myround.run()
+
+
+def test_bot(): #TODO Complete the test
   myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
-                  hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=0)
+                  hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
 
 
 
@@ -484,6 +534,7 @@ if __name__=="__main__"   :
   generic.test("play_pli",test_play_pli)
   generic.test("classic_drawing",test_classic_drawing)
   generic.test("cut",test_cut)
-  generic.test("shortcut",test_shortcut)
+  generic.test("getPlayersInOrder",test_getPlayersInOrder)
   generic.test("bot",test_bot)
+  generic.test("run",test_run)
 

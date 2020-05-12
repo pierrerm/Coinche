@@ -89,10 +89,12 @@ class Game():
     pioche+=self.Round.teams[0].pli
     pioche+=self.Round.teams[1].pli
       # the last round wasn't played
-    players_in_order=self.Round.shortkey() #changer ordre a chaque manche ????
+    players_in_order=self.Round.getPlayersInOrder() #changer ordre a chaque manche ????
     for player in players_in_order :
       pioche+=player.Hand
     assert(pioche.rest["cards"]==32)
+
+    # Reset trump and value information of the previous round
     for card in pioche.cards : # it seems to work
       card.reset()
 
@@ -100,20 +102,6 @@ class Game():
                         number=round_number,pioche=pioche,hidden=self.hidden,
                         difficulty=self.difficulty)
 
-  def play(self):
-       if self.Round.choose_trump() : #choisir valeur par defaut pour les test
-         players_in_order=self.Round.shortkey() #changer ordre a chaque manche ????
-         self.Round.cards_update()
-         for i in range(8):
-            if not self.hidden: #GRAPHIC
-                print("pli {} : \n \n".format(i))
-            players_in_order=self.Round.play_pli( players=players_in_order, pli_number=i+1) #erreur dans le decompte des plis confusion avec les tas player bug a iteration2 a priori fonctionne : confusion entre la position dans la main et celles des cartes possibles
-         for k in range(2):
-            if not self.hidden: #GRAPHIC
-              self.Round.teams[k].pli.display()
-         return True #a trump was picked
-       else :
-         return False #nobody picked a trump : it's a white round
 
   def reinitialize(self):
     self.new_round(round_number=0)
@@ -122,13 +110,13 @@ class Game():
 
   def run(self):
      while True : #game root
-       round_number = -1 # to start the first at 0
+       round_number = 0 # The first Round is the Round 1
        played = True
        while True: # round root
          while True : #round of assertion : is a trump is taken or not
            round_number+=1
            self.new_round(round_number)
-           played=self.play()
+           played=self.Round.run()
            if played :
              break
          if not self.end_round():
