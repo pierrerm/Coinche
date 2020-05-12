@@ -11,32 +11,30 @@ from Card import Card
 
 import generical_function as generic
 import coinche_constant as const
+import random as rand
 
 
 
 
 class Game():
-   def __init__(self, team1_name="e1", j1_name="joueur1", j1_random=False, j3_name="joueur3", j3_random=True,
-             team2_name="e2", j2_name="joueur2", j2_random=True,j4_name="joueur4", j4_random=True,
-             score_limit=2000,hidden=False):
 
-     self.data={"team1_name":team1_name, "j1_name":j1_name, "j1_random":j1_random, "j3_name":j3_name, "j3_random":j3_random,
-             "team2_name":team2_name, "j2_name":j2_name, "j2_random":j2_random,"j4_name":j4_name, "j4_random":j4_random}
+  def __init__(self, team_names=["e1","e2"], player_names=["j1","j2","j3","j4"], player_bots=[False,True,True,True],
+                score_limit=2000,hidden=False,
+                difficulty="beginner"):
 
-     self.Round=Round(team1_name=self.data["team1_name"], j1_name=self.data["j1_name"], j1_random=self.data["j1_random"],
-                j3_name=self.data["j3_name"], j3_random=self.data["j3_random"],
-                team2_name=self.data["team2_name"], j2_name=self.data["j2_name"], j2_random=self.data["j2_random"],
-                j4_name=self.data["j4_name"], j4_random=self.data["j4_random"],
-                number=0,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.liste_numero for j in const.liste_couleur]),hidden=hidden)
+      self.data= {"team_names":team_names, "player_names":player_names, "player_bots":player_bots}
 
-     #self.Round=Round(team1_name=team1_name, j1_name=j1_name, j1_random=j1_random, j3_name=j3_name, j3_random=j3_random,
-     #team2_name=team2_name, j2_name=j2_name, j2_random=j2_random,j4_name=j4_name, j4_random=j4_random, hidden=hidden ) #faire un tableau de manche
-     self.limit=score_limit
-     self.score={team1_name:0,team2_name:0}
-     self.hidden=hidden
+      self.Round=Round(team_names=self.data["team_names"], player_names=self.data["player_names"], player_bots=self.data["player_bots"],
+                number=0,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),hidden=hidden,
+                difficulty=difficulty)
+
+      self.limit=score_limit
+      self.score={team_names[0]:0,team_names[1]:0}
+      self.hidden=hidden
+      self.difficulty=difficulty
 
 
-   def result(self): # normalement mise nest pas char
+  def result(self): # normalement mise nest pas char
       total_points=self.Round.teams[0].pli.count_points()+self.Round.teams[1].pli.count_points()
       assert(total_points==162 or total_points==182) #compte les points par équipe pas encore de 10 de der
       if self.Round.surcoinche :
@@ -71,7 +69,7 @@ class Game():
                     print("l'équipe {} a chuté ".format(team.name))
                   self.score[self.Round.teams[(team.number+1)%2].name] += 160*multiplicator
 
-   def end_round(self) :
+  def end_round(self) :
 
        self.result()
        if not self.hidden: #GRAPHIC
@@ -84,7 +82,7 @@ class Game():
                return False
        return True
 
-   def new_round(self,round_number) :
+  def new_round(self,round_number) :
 
     pioche=Hand(name="pioche",cards=[],sort=False)
       # the last round was played
@@ -98,15 +96,12 @@ class Game():
     for card in pioche.cards : # it seems to work
       card.reset()
 
-    self.Round=Round(team1_name=self.data["team1_name"], j1_name=self.data["j1_name"], j1_random=self.data["j1_random"],
-                        j3_name=self.data["j3_name"], j3_random=self.data["j3_random"],
-                        team2_name=self.data["team2_name"], j2_name=self.data["j2_name"], j2_random=self.data["j2_random"],
-                        j4_name=self.data["j4_name"], j4_random=self.data["j4_random"],
-                        number=round_number,pioche=pioche,hidden=self.hidden)
+    self.Round=Round(team_names=self.data["team_names"], player_names=self.data["player_names"], player_bots=self.data["player_bots"],
+                        number=round_number,pioche=pioche,hidden=self.hidden,
+                        difficulty=self.difficulty)
 
-
-   def play(self):
-       if self.Round.choose_atout() : #choisir valeur par defaut pour les test
+  def play(self):
+       if self.Round.choose_trump() : #choisir valeur par defaut pour les test
          players_in_order=self.Round.shortkey() #changer ordre a chaque manche ????
          self.Round.cards_update()
          for i in range(8):
@@ -120,13 +115,12 @@ class Game():
        else :
          return False #nobody picked a trump : it's a white round
 
-   def reinitialize(self):
-     self.new_round(round_number=0)
-     self.score={self.data["team1_name"]:0,self.data["team2_name"]:0}
+  def reinitialize(self):
+    self.new_round(round_number=0)
+    self.score={self.data["team_names"][0]:0,self.data["team_names"][1]:0}
 
 
-
-   def run(self):
+  def run(self):
      while True : #game root
        round_number = -1 # to start the first at 0
        played = True
@@ -145,7 +139,7 @@ class Game():
          self.reinitialize()
 
 def random_test():
-    mygame=Game(j1_random=True,hidden=True)
+    mygame=Game(player_bots=[True]*4,hidden=True,difficulty="advanced")
     mygame.run()
 
 if __name__=="__main__"   :

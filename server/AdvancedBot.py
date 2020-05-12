@@ -18,7 +18,7 @@ class AdvancedBot(Bot):
     Bot.__init__(self,cards=cards,level=level,name=name,allyName=allyName,ennemyNames=ennemyNames)
     self.previouscounter={} #keep track of the last round
     self.announcetracker={}
-    for color in const.liste_couleur :
+    for color in const.COLORS :
       self.announcetracker[color]=False
 
 
