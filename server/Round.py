@@ -13,6 +13,8 @@ from Team import Team
 import random as rand
 from Bot import Bot
 from AdvancedBot import AdvancedBot
+from GraphicManager import GraphicManager
+
 
 
 class Round():
@@ -139,7 +141,7 @@ class Round():
               break
            else:
               if not self.hidden :  #GRAPHIC
-                player.Hand.display(player.random)
+                player.Hand.display()
 
               if not generic.decision(random=player.random, question='annoncer', ouverte=False): #local variable referenced before assignment
                  turn+=1
@@ -168,7 +170,7 @@ class Round():
                  for coincheur in self.teams[(player.team+1)%2].players:
 
                    if not self.hidden :  #GRAPHIC
-                     coincheur.Hand.display(coincheur.random)
+                     coincheur.Hand.display()
 
                    if not self.coinche :
                       self.coinche=generic.decision(random=coincheur.random, question='coincher sur {} {} ?'.format(bet,self.trump), ouverte=False)
@@ -178,7 +180,7 @@ class Round():
                          for surcoincheur in self.teams[player.team].players:
 
                            if not self.hidden : #GRAPHIC
-                             surcoincheur.Hand.display(surcoincheur.random)
+                             surcoincheur.Hand.display()
 
                            if not self.surcoinche :
                                self.surcoinche=generic.decision(random=surcoincheur.random, question='surcoincher sur {} {} ?'.format(bet,self.trump), ouverte=False)
@@ -319,12 +321,12 @@ class Round():
 
       for j in players[1:]:
           if not self.hidden :#GRAPHIC
-            self.pli.display(j.random)
+            self.pli.display()
           allowed_hand=self.allowed_cards( choosen_color, j)
           choosen_card=allowed_hand.choose_card(random=j.random)           # trois lignes a verifier
           j.Hand.play_card( self.pli, choosen_card)
       if not self.hidden :# GRAPHIC
-        self.pli.display(self.hidden)
+        self.pli.display()
 
       winner=self.pli.winner()
 

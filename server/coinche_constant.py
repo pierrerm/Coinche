@@ -42,3 +42,5 @@ for i in range(1,33):
     INTEGERS32.append(str(i))
     
 TRUMPORDER=['7', '8', 'D', 'R', '10', 'As', '9', 'V']
+
+OUTPUT=["terminal","graphic"]

@@ -9,6 +9,8 @@ import coinche_constant as const
 import generical_function as generic
 from Card import Card
 
+from GraphicManager import GraphicManager 
+
 class Hand():
   """
   Hand of Game Cards
@@ -26,16 +28,6 @@ class Hand():
            self.rest[color]+=1
      if sort :
        self.color_sort()
-
-  def display(self,hidden=False): #TODO : REMOVE It must be in javascript
-     """
-     display an array of cards
-     """
-     if not hidden :
-         print("\n \n {:^15} \n".format(self.name))
-         for i in range(len(self.cards)):
-           print("{} : {:>2} de {} ".format(str(i+1),self.cards[i].number,self.cards[i].color))
-         print()
 
   def __iadd__(self, oldhand):
     """
@@ -98,18 +90,8 @@ class Hand():
             cards_of_this_color.append(card)
     return Hand(cards=cards_of_this_color, name =chosen_color)
 
-  def choose_card(self,random=True): #TODO : REMOVE It must be in javascript
-     """
-     choose and return a card
-     """
-     while True :
-         if not random : #GRAPHIC
-           self.display()
-         card_position = generic.decision(liste_choix_possible=const.INTEGERS32[:len(self.cards)], random=random, question="Quelle carte ? 1ère, 2ème ? ")
-         card_position = int(card_position)-1
-         if card_position<len(self.cards) :
-             if self.cards[card_position].rest:
-                 return self.cards[card_position]
+
+
 
   def play_card(self ,pli ,choosen_card):
    """
@@ -144,6 +126,22 @@ class Hand():
     assert(self.cards.index(winner)<4)
     return self.cards.index(winner)
 
+  #User Interface
+
+  def display(self): #UI
+     """
+     display an array of cards
+     """
+     GraphicManager.display(self)
+
+  def choose_card(self,random=True): #UI
+    """
+    choose and return a card
+    """
+    return GraphicManager.choose_card(self,random)
+
+  #checking methods
+
   def test(self, name="Cards", coeur=0, pique=0, carreau=0, trefle=0, points=0):
     """
     assert that the hand is as it should be. It is set by default as empty
@@ -166,6 +164,32 @@ class Hand():
         return True
     else :
       return False
+
+#TESTS
+
+def test_play_card():
+  mycard3=Card("7","carreau")
+  mycard4=Card("7","coeur")
+  mycard5=Card("As","coeur")
+  mycard6=Card("R","pique")
+
+  myhand3=Hand(cards=[mycard3,mycard4])
+  mypli=Hand(name="Pli", cards=[mycard5,mycard6])
+
+  myhand3.play_card(pli=mypli, choosen_card=mycard3)
+
+  myhand3.test(coeur=1)
+
+  mypli.test("Pli",coeur=1,pique=1,carreau=1)
+
+
+  mypli.play_card(pli=myhand3, choosen_card=mycard3)
+  mypli.play_card(pli=myhand3, choosen_card=mycard5)
+  mypli.play_card(pli=myhand3, choosen_card=mycard6)
+
+  myhand3.test(coeur=2,pique=1,carreau=1)
+  mypli.test("Pli")
+
 
 
 if __name__=="__main__"   :
@@ -245,13 +269,6 @@ if __name__=="__main__"   :
   print("Test OK")
 
 
-  print("display test")
-  mypioche.display(hidden=True)
-  myhand.display(hidden=True)
-  myhand2.display(hidden=True)
-  print("No Test")
-
-
   print("remove test")
   mypioche.cards[4].rest=False
   mypioche.remove_cards()
@@ -262,38 +279,6 @@ if __name__=="__main__"   :
   mypioche.cards[7].rest=False
   mypioche.remove_cards()
   mypioche.test("pioche",6,7,8,8)
-
-  print("Test OK")
-
-
-  print("choose test")
-
-  for i in range (100):
-    card=mypioche.choose_card()
-    assert(card.rest)
-
-  print("play_card test")
-  mycard3=Card("7","carreau")
-  mycard4=Card("7","coeur")
-  mycard5=Card("As","coeur")
-  mycard6=Card("R","pique")
-
-  myhand3=Hand(cards=[mycard3,mycard4])
-  mypli=Hand(name="Pli", cards=[mycard5,mycard6])
-
-  myhand3.play_card(pli=mypli, choosen_card=mycard3)
-
-  myhand3.test(coeur=1)
-
-  mypli.test("Pli",coeur=1,pique=1,carreau=1)
-
-
-  mypli.play_card(pli=myhand3, choosen_card=mycard3)
-  mypli.play_card(pli=myhand3, choosen_card=mycard5)
-  mypli.play_card(pli=myhand3, choosen_card=mycard6)
-
-  myhand3.test(coeur=2,pique=1,carreau=1)
-  mypli.test("Pli")
 
   print("Test OK")
 
@@ -351,11 +336,8 @@ if __name__=="__main__"   :
   assert(myhand.check_card(dpique))
 
 
-
-
-
-
-
   print("Test OK")
+
+  generic.test("play_card",test_play_card)
 
 

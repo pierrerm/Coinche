@@ -12,6 +12,7 @@ from Card import Card
 import generical_function as generic
 import coinche_constant as const
 import random as rand
+from GraphicManager import GraphicManager
 
 
 
