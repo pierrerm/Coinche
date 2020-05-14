@@ -22,7 +22,7 @@ class Round():
   One Round of coinche
   """
   def __init__(self, team_names, player_names, player_bots,
-               number,pioche, hidden=False,
+               number,pioche,
                difficulty="beginner"): # e1 et e2 inutiles
 
     self.number=number 
@@ -69,7 +69,6 @@ class Round():
                       j1_name=player_names[1], j1_random=player_bots[1], j1_cards=players_cards[1],
                       j2_name=player_names[3], j2_random=player_bots[2], j2_cards=players_cards[3])]
 
-    self.hidden=hidden
 
 
 
@@ -81,7 +80,7 @@ class Round():
     for nb_player in range(4):
       player=list()
       for nb_card in range(8):
-        card=self.pioche.choose_card(random=True)
+        card=self.pioche.choose_card(isBot=True)
         card.rest=False
         player.append(card)
       players.append(player)
@@ -123,83 +122,6 @@ class Round():
     #This little trick should shift the first player every round 
     return [ players[ ( i + self.number-1 ) % 4 ] for i in range(4) ]
 
-    
-
-
-  #TODO : Remove it must be javascript
-  def choose_trump(self): # pensez a display avant surcoinche empecher danooncer 170 180 tout trump sans trump
-     """
-     fix the trump and return true if someone didnt pass his turn
-     """
-     j=self.getPlayersInOrder()
-     bet=0
-     annonce_actuelle=-1
-     turn=0
-     while turn!=4 and bet!='generale' and not self.coinche:
-        for player in j:
-           if turn==4 or bet=='generale' or self.coinche:
-              break
-           else:
-              if not self.hidden :  #GRAPHIC
-                player.Hand.display()
-
-              if not generic.decision(random=player.random, question='annoncer', ouverte=False): #local variable referenced before assignment
-                 turn+=1
-
-              else:
-                 turn=1
-
-                 self.trump=generic.decision(const.COLORS, random=player.random, question ="Choisir la couleur d'trump : %s " % const.COLORS)
-
-                 while True :
-
-                    bet = generic.decision(const.ANNOUNCES, random=player.random, question="Choisir la hauteur d'annonce : %s " % const.ANNOUNCES )
-                    annonce_voulue=const.ANNOUNCES.index(bet)
-                    if annonce_voulue>annonce_actuelle :
-                        annonce_actuelle=annonce_voulue
-
-                        if not self.hidden :  #GRAPHIC
-                          print(' {} prend à {} {} !'.format(player.name,bet,self.trump))
-
-                        break
-
-                 self.teams[player.team].bet=bet #fixe la bet de lteam attention bet est un char
-                 self.teams[(player.team+1)%2].bet=None
-                 if bet == "generale":
-                     player.generale=True
-                 for coincheur in self.teams[(player.team+1)%2].players:
-
-                   if not self.hidden :  #GRAPHIC
-                     coincheur.Hand.display()
-
-                   if not self.coinche :
-                      self.coinche=generic.decision(random=coincheur.random, question='coincher sur {} {} ?'.format(bet,self.trump), ouverte=False)
-                      if self.coinche:
-                         if not self.hidden : #GRAPHIC
-                           print(' {} coinche sur {} {} !'.format(coincheur.name,bet,self.trump))
-                         for surcoincheur in self.teams[player.team].players:
-
-                           if not self.hidden : #GRAPHIC
-                             surcoincheur.Hand.display()
-
-                           if not self.surcoinche :
-                               self.surcoinche=generic.decision(random=surcoincheur.random, question='surcoincher sur {} {} ?'.format(bet,self.trump), ouverte=False)
-                               if self.surcoinche :
-                                 if not self.hidden : #GRAPHIC
-                                   print(' {} surcoinche sur {} {} !'.format(surcoincheur.name,bet,self.trump))
-
-     if (self.trump==None):
-          return False
-
-     if not self.hidden :  #GRAPHIC
-       for team in self.teams :
-            if team.bet!=None:
-                print("L'équipe '{}' a pris {} à {} !!!".format(team.name, team.bet, self.trump))
-
-     return True
-
-
-
   def cards_update(self): #memory leak => the next round will start with a pli of 40 cards for no reason
     """
     Update the cards after the trump color is choosen
@@ -218,8 +140,6 @@ class Round():
                     if card.number=="R" or card.number=="D":
                         belote+=1
                         if belote==2:
-                            if not self.hidden :  #GRAPHIC
-                              print("le joueur {} a la belote".format(j.name)) # do not tell it right away
                             self.teams[j.team].pli.points+=20
 
                 else :
@@ -317,21 +237,30 @@ class Round():
 
       #la meilleure card est le 1er joueur pour l'ini
 
-      choosen_color=players[0].Hand.play_card( self.pli, players[0].Hand.choose_card(random=players[0].random))
+      if not players[0].random :
+        GraphicManager.display(self.pli)#UI
+        GraphicManager.display(players[0].Hand)#UI
+
+      choosen_color=players[0].Hand.play_card( self.pli, players[0].Hand.choose_card(isBot=players[0].random))
 
       for j in players[1:]:
-          if not self.hidden :#GRAPHIC
-            self.pli.display()
-          allowed_hand=self.allowed_cards( choosen_color, j)
-          choosen_card=allowed_hand.choose_card(random=j.random)           # trois lignes a verifier
-          j.Hand.play_card( self.pli, choosen_card)
-      if not self.hidden :# GRAPHIC
-        self.pli.display()
+
+        allowed_hand=self.allowed_cards( choosen_color, j)
+
+        if not j.random :
+          GraphicManager.display(self.pli)#UI
+          GraphicManager.display(allowed_hand)#UI
+
+        choosen_card=allowed_hand.choose_card(isBot=j.random)           # trois lignes a verifier
+        j.Hand.play_card( self.pli, choosen_card)
+
+      GraphicManager.display(self.pli)#UI
+
 
       winner=self.pli.winner()
 
-      if not self.hidden :#GRAPHIC
-          print("{} a gagné avec le {} de {}".format(players[winner].name, self.pli.cards[winner].number , self.pli.cards[winner].color ))
+      GraphicManager.winner(name=players[winner].name,number=self.pli.cards[winner].number,color=self.pli.cards[winner].color) #UI
+
       new_order=[players[winner],players[(winner+1)%4], players[(winner+2)%4] ,players[(winner+3)%4]]
       players[winner].plis+=1
       self.teams[players[winner].team].pli+=self.pli #reinitialise le pli
@@ -347,19 +276,26 @@ class Round():
     """
     Run the round
     """
-    if self.choose_trump() : #choisir valeur par defaut pour les test
+    if self.chooseTrump() : #choisir valeur par defaut pour les test
       players_in_order=self.getPlayersInOrder() #changer ordre a chaque manche ????
       self.cards_update()
       for i in range(8):
-        if not self.hidden: #GRAPHIC
-            print("pli {} : \n \n".format(i))
         players_in_order=self.play_pli( players=players_in_order, pli_number=i+1) #erreur dans le decompte des plis confusion avec les tas player bug a iteration2 a priori fonctionne : confusion entre la position dans la main et celles des cartes possibles
       for k in range(2):
-        if not self.hidden: #GRAPHIC
-          self.teams[k].pli.display()
+        GraphicManager.display(self.teams[k].pli)
       return True #a trump was picked
     else :
       return False #nobody picked a trump : it's a white round
+    
+
+
+  #User Interface methods 
+
+  def chooseTrump(self): # UI
+    """
+    fix the trump and return true if someone didnt pass his turn
+    """
+    return GraphicManager.chooseTrump(self)
       
 """
 TESTS 
@@ -367,7 +303,7 @@ TESTS
 
 def test_init():
   myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
-                   hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
+                   pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
 
 
   "check if pioche is empty"
@@ -394,7 +330,7 @@ def test_init():
 def test_classic_drawing():
 
   myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
-                   hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
+                   pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
 
   myround.pioche = Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]])
   players=myround.classic_draw()
@@ -438,7 +374,7 @@ def test_classic_drawing():
 def test_cut():
 
   myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
-                   hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
+                   pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
 
   for nb_of_try in range(100):
 
@@ -459,28 +395,28 @@ def test_cut():
 
 def test_getPlayersInOrder():
   myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
-                   hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
+                   pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
 
   p=myround.getPlayersInOrder()
   p[1].Hand=Hand(cards=[Card("7","trefle")])
   assert(myround.teams[1].players[0].Hand.check_card(Card("7","trefle")))
 
   myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
-                   hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=2)
+                   pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=2)
 
   p=myround.getPlayersInOrder()
   p[1].Hand=Hand(cards=[Card("7","trefle")])
   assert(myround.teams[0].players[1].Hand.check_card(Card("7","trefle")))
 
   myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
-                   hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=7)
+                   pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=7)
 
   p=myround.getPlayersInOrder()
   p[1].Hand=Hand(cards=[Card("7","trefle")])
   assert(myround.teams[1].players[1].Hand.check_card(Card("7","trefle")))
 
   myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
-                   hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=12)
+                   pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=12)
 
   p=myround.getPlayersInOrder()
   p[1].Hand=Hand(cards=[Card("7","trefle")])
@@ -490,19 +426,19 @@ def test_getPlayersInOrder():
 
 def test_choose_trump(): #random test
   myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
-                  hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
-  myround.choose_trump()
+                  pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
+  myround.chooseTrump()
 
 def test_cards_update(): #random test
   myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
-                   hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
-  if myround.choose_trump() :
+                   pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
+  if myround.chooseTrump() :
      myround.cards_update()
 
-def test_play_pli(hidden=True): #•fonctionne
+def test_play_pli(): #•fonctionne
   myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
-                  hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
-  if myround.choose_trump() :
+                  pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
+  if myround.chooseTrump() :
     myround.cards_update()
     players=myround.getPlayersInOrder()
     for i in range(8):
@@ -511,13 +447,13 @@ def test_play_pli(hidden=True): #•fonctionne
 def test_run():
   for i in range(500):
     myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
-                    hidden=True,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
+                    pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
     myround.run()
 
 
 def test_bot(): #TODO Complete the test
   myround =  Round(team_names=["Les winners","Les loseurs"],player_names=["Bob","Bill","Fred","John"],player_bots=[True,True,True,True],
-                  hidden=False,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
+                  pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),number=1)
 
 
 
@@ -529,6 +465,7 @@ def test_bot(): #TODO Complete the test
 
 
 if __name__=="__main__"   :
+  GraphicManager.hidden=True
 
   generic.test("init and random draw",test_init)
   generic.test("choose_trump",test_choose_trump)

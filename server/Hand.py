@@ -134,11 +134,11 @@ class Hand():
      """
      GraphicManager.display(self)
 
-  def choose_card(self,random=True): #UI
+  def choose_card(self,isBot=True): #UI
     """
     choose and return a card
     """
-    return GraphicManager.choose_card(self,random)
+    return GraphicManager.choose_card(self,isBot)
 
   #checking methods
 

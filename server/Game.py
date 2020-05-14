@@ -23,17 +23,18 @@ class Game():
                 score_limit=2000,hidden=False,
                 difficulty="beginner"):
 
+      GraphicManager.hidden=hidden
+
       self.data= {"team_names":team_names, "player_names":player_names, "player_bots":player_bots}
 
       self.round=Round(team_names=self.data["team_names"], player_names=self.data["player_names"], player_bots=self.data["player_bots"],
-                number=0,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),hidden=hidden,
+                number=0,pioche=Hand(name="pioche",cards=[Card(i,j) for i in const.NUMBERS for j in const.COLORS[:4]]),
                 difficulty=difficulty)
 
       self.limit=score_limit
       self.score={team_names[0]:0,team_names[1]:0}
-      self.hidden=hidden
-      self.difficulty=difficulty
 
+      self.difficulty=difficulty
 
   def result(self): # normalement mise nest pas char
       total_points=self.round.teams[0].pli.count_points()+self.round.teams[1].pli.count_points()
@@ -49,10 +50,10 @@ class Game():
           if team.bet != None:
               capot= team.bet==250 and len(team.pli.cards)==32 #bool capot
               generale=(team.players[0].plis==8 and team.players[0].generale==True ) or ( team.players[1].plis==8 and team.players[1].generale==True) #bool generale
+
               #cas 1 : réussite du contrat
               if team.bet<=team.pli.points or capot or generale : #faire cas général : compteur de pli gagné par player
-                if not self.hidden: #GRAPHIC
-                  print("l'équipe {} a réussit son contrat".format(team.name))
+
 
                 #cas 1.1 : coinché ou surcoinché
                 if self.round.coinche :
@@ -64,23 +65,28 @@ class Game():
                     self.score[team.name] += team.bet # seulement points contrats
                     self.score[self.round.teams[(team.number+1)%2].name] += self.round.teams[(team.number+1)%2].pli.points #points defense
 
+                #It's a success
+                GraphicManager.result(team=team,win=True,score=self.score) #UI
+
+
+
               #cas 2 : échec du contrat
               else :
-                  if not self.hidden: #GRAPHIC
-                    print("l'équipe {} a chuté ".format(team.name))
                   self.score[self.round.teams[(team.number+1)%2].name] += 160*multiplicator
+                  
+                  #It's a fail 
+                  GraphicManager.result(team=team,win=False,score=self.score) #UI
+
+
+
+
 
   def end_round(self) :
-
        self.result()
-       if not self.hidden: #GRAPHIC
-         print(self.score)
        for team in self.score:
          if self.score[team]>self.limit: #error
-               if not self.hidden: #GRAPHIC
-                 print(self.round.atout, self.round.teams[0].bet, self.round.teams[1].bet)
-                 print( " l'équipe {} a gagné avec {} ".format(team, self.score))
-               return False
+            GraphicManager.end(team=team,game=self) #UI
+            return False
        return True
 
   def new_round(self,round_number) :
@@ -100,7 +106,7 @@ class Game():
       card.reset()
 
     self.round=Round(team_names=self.data["team_names"], player_names=self.data["player_names"], player_bots=self.data["player_bots"],
-                        number=round_number,pioche=pioche,hidden=self.hidden,
+                        number=round_number,pioche=pioche,
                         difficulty=self.difficulty)
 
 
@@ -122,14 +128,15 @@ class Game():
              break
          if not self.end_round():
            break
-       if not generic.decision(question="une nouvelle partie", ouverte=False,random=self.hidden):
+       #this trick automatize the launch of a new game if all players are bots
+       if GraphicManager.newGame(isBot= ( 2+sum(self.data["player_bots"]) ) %5): #UI
          break
        else :
          self.reinitialize()
 
 def random_test():
-    mygame=Game(player_bots=[True]*4,hidden=True,difficulty="advanced")
-    mygame.run()
+  mygame=Game(player_bots=[True]*4,hidden=True,difficulty="advanced")
+  mygame.run()
 
 if __name__=="__main__"   :
 

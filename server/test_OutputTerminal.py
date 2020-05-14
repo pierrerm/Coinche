@@ -10,7 +10,7 @@ import generical_function as generic
 from Card import Card
 from Hand import Hand
 import coinche_constant as const
-
+from GraphicManager import GraphicManager
 """
 Les tests générés ici sont réalisés depuis le plus haut level (les classes Hand game round ..)
 """
@@ -38,6 +38,7 @@ def test_choose_card():
 
 
 if __name__=="__main__"   :
+  GraphicManager.hidden=True
   generic.test("display",test_display)
   generic.test("choose_card",test_choose_card)
 
