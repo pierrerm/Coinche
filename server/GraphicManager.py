@@ -27,6 +27,8 @@ class GraphicManager():
     assert(newOutput in const.OUTPUT)
     GraphicManager.output =newOutput
 
+  #Display methods
+
   @classmethod
   def display(cls,hand): 
      """
@@ -36,8 +38,8 @@ class GraphicManager():
       if cls.output=="terminal":
         OutputTerminal.display(hand)
 
-      if cls.output=="terminal":
-        pass
+      if cls.output=="web":
+        OutputWeb.update() # need game or round as arg maybe
 
   @classmethod
   def result(cls,team,win,score): 
@@ -48,8 +50,8 @@ class GraphicManager():
       if cls.output=="terminal":
         OutputTerminal.result(team,win,score)
 
-      if cls.output=="terminal":
-        pass
+      if cls.output=="web":
+        OutputWeb.update() # need game or round as arg maybe
 
   @classmethod
   def winner(cls,name,number,color) :
@@ -60,8 +62,8 @@ class GraphicManager():
       if cls.output=="terminal":
         OutputTerminal.winner(name,number,color)
 
-      if cls.output=="terminal":
-        pass
+      if cls.output=="web":
+        OutputWeb.update() # need game or round as arg maybe
 
 
 
@@ -75,8 +77,11 @@ class GraphicManager():
       if cls.output=="terminal":
         OutputTerminal.end(team,game)
 
-      if cls.output=="terminal":
-        pass
+      if cls.output=="web":
+        OutputWeb.update() # need game or round as arg maybe
+
+  
+  #Choice methods
 
   @classmethod
   def newGame(cls,isBot): 
@@ -86,8 +91,10 @@ class GraphicManager():
     if cls.output=="terminal":
           return OutputTerminal.newGame(isBot)
 
-    if cls.output=="terminal":
-      pass
+    if cls.output=="web":
+        return OutputWeb.newGame(isBot) 
+
+
   @classmethod
   def choose_card(cls,hand,isBot): #UI
     """
@@ -96,8 +103,8 @@ class GraphicManager():
     if cls.output=="terminal":
           return OutputTerminal.choose_card(hand,isBot)
 
-    if cls.output=="terminal":
-      pass
+    if cls.output=="web":
+        return OutputWeb.choose_card(hand,isBot) #hand must be allowed cards which will be check by ID 
 
   @classmethod
   def chooseTrump(cls,round): # pensez a display avant surcoinche empecher danooncer 170 180 tout trump sans trump
@@ -107,8 +114,8 @@ class GraphicManager():
     if cls.output=="terminal":
           return OutputTerminal.chooseTrump(round,cls.hidden)
 
-    if cls.output=="terminal":
-      pass
+    if cls.output=="web":
+        return OutputWeb.chooseTrump(round) #hand must be allowed cards which will be check by ID 
 
 
 
@@ -126,8 +133,8 @@ class GraphicManager():
 def test_setOuput():
 
   mymanager = GraphicManager()
-  mymanager.setOutput("graphic")
-  assert(GraphicManager.output=="graphic")
+  mymanager.setOutput("web")
+  assert(GraphicManager.output=="web")
 
   GraphicManager.setOutput("terminal")
   assert(mymanager.output=="terminal")

@@ -43,4 +43,4 @@ for i in range(1,33):
     
 TRUMPORDER=['7', '8', 'D', 'R', '10', 'As', '9', 'V']
 
-OUTPUT=["terminal","graphic"]
+OUTPUT=["terminal","web"]
